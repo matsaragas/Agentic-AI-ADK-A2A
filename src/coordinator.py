@@ -1,4 +1,4 @@
-from src.remote_agent_connection import TaskUpdateCallback, RemoteAgentConnections
+from remote_agent_connection import TaskUpdateCallback, RemoteAgentConnections
 from a2a.types import (
     AgentCard, SendMessageRequest, SendMessageResponse, SendMessageSuccessResponse, MessageSendParams, Task
 )
@@ -8,12 +8,17 @@ from google.adk.tools.tool_context import ToolContext
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.agents.readonly_context import ReadonlyContext
 
+from dotenv import load_dotenv
+
 from typing import List, Dict
 import httpx
 import uuid
 import os
 import asyncio
+import json
 
+
+load_dotenv()
 
 class CoordinatorAgent:
     """The Coordinator agent.
@@ -25,7 +30,7 @@ class CoordinatorAgent:
     ):
         self.task_callback = task_callback
         self.remote_agent_connections: dict[str, RemoteAgentConnections] = {}
-        self.cards: Dict[str, AgentCard]
+        self.cards: Dict[str, AgentCard] = {}
         self.agents: str = ""
 
     async def _async_init_components(self, remote_agent_addresses: List[str]) -> None:
@@ -177,7 +182,7 @@ class CoordinatorAgent:
             A dictionary of JSON data
         """
 
-        if agent not in self.remote_agent_connections:
+        if agent_name not in self.remote_agent_connections:
             raise ValueError(f'Agent {agent_name} not found')
 
         print(
