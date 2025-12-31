@@ -2,7 +2,7 @@
 import logging
 import click
 import uvicorn
-from src.agent import product_catalog_agent
+from agent import product_catalog_agent
 from a2a.server.apps import A2AStarletteApplication
 from a2a.types import (
     AgentCapabilities,
@@ -11,7 +11,7 @@ from a2a.types import (
 )
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.server.request_handlers import DefaultRequestHandler
-from src.agent_executor import ProductAgentExecutor
+from agent_executor import ProductAgentExecutor
 from dotenv import load_dotenv
 
 load_dotenv()
