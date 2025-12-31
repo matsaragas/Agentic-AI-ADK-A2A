@@ -4,3 +4,5 @@ This repo highlights how to use the agent2Agent (A2A) protocol for multi-agent c
 where multiple agents work together to accomplish a goal. 
 
 The application features 
+
+![Alt text](picture/adk-a2a-demo.png)
