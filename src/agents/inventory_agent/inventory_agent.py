@@ -9,7 +9,7 @@ from agent_utils import retry_config
 
 # Create the Inventory Agent
 # This agent specializes in checking stock levels and restocking schedules
-product_catalog_agent = LlmAgent(
+inventory_product_agent = LlmAgent(
     model=Gemini(model="gemini-2.5-flash-lite", retry_options=retry_config),
     name="inventory_agent",
     description="External vendor's inventory agent that provides information on the existing inventory and restocking schedules",
