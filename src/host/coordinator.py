@@ -57,7 +57,6 @@ class CoordinatorAgent:
                         f'ERROR: Failed to get agent card from {address}: {e}'
                     )
 
-
                 except Exception as e:  # Catch other potential errors
                     print(
                         f'ERROR: Failed to initialize connection for {address}: {e}'

@@ -28,3 +28,68 @@ class InventoryAgentExecutor(AgentExecutor):
             session_service=InMemorySessionService(),
             memory_service=InMemoryMemoryService(),
         )
+
+    async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
+        query = context.get_user_input()
+        task = context.current_task or new_task(context.message)
+        await event_queue.enqueue_event(task)
+
+
+    async def execute(self, context: RequestContext,
+                      event_queue: EventQueue):
+        query = context.get_user_input()
+        task = context.current_task or new_task(context.message)
+        await event_queue.enqueue_event(task)
+
+        updater = TaskUpdater(event_queue, task.id, task.content_id)
+        if context.call_context:
+            user_id = context.call_context.use.user_name
+        else:
+            user_id = "a2a_user"
+
+        try:
+            await updater.update_status(
+                TaskState.working,
+                new_agent_text_message(self.status_message, task.context_id, task.id)
+            )
+
+            session = await self.runner.session_service.create_session(
+                app_name=self.agent.name,
+                user_id=user_id,
+                state={},
+                session_id=task.context_id
+            )
+
+            content = types.Content(
+                role="user", parts=[types.Part.from_text(text=query)]
+            )
+
+            response_text = ""
+            async for event in self.runner.run_async(
+                    user_id=user_id, session_id=session.id, new_message=content
+            ):
+                if event.is_final_response() and event.content and event.content.parts:
+                    for part in event.content.parts:
+                        if hasattr(part, "text") and part.text:
+                            response_text += part.text + "\n"
+                        elif hasattr(part, "function_call"):
+                            pass
+
+
+            await updater.add_artifact(
+                [Part(root=TextPart(text=response_text))],
+                name=self.artifact_name,
+            )
+
+            await updater.complete()
+
+        except Exception as e:
+            await updater.update_status(
+                TaskState.failed,
+                new_agent_text_message(f"Error: {e!s}", task.context_id, task.id),
+                final=True,
+            )
+
+
+
+

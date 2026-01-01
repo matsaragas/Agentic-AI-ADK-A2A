@@ -1,3 +1,5 @@
+import logging
+
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
@@ -9,6 +11,7 @@ from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from a2a.utils import new_agent_text_message, new_task
 from google.genai import types
 
+logger = logging.getLogger(__name__)
 
 
 class ProductAgentExecutor(AgentExecutor):
@@ -43,7 +46,11 @@ class ProductAgentExecutor(AgentExecutor):
         task = context.current_task or new_task(context.message)
         await event_queue.enqueue_event(task)
 
+        logger.info(f"Context during execution: {context}")
+
         updater = TaskUpdater(event_queue, task.id, task.context_id)
+
+
 
         if context.call_context:
             user_id = context.call_context.user.user_name
@@ -56,6 +63,8 @@ class ProductAgentExecutor(AgentExecutor):
                 TaskState.working,
                 new_agent_text_message(self.status_message, task.context_id, task.id)
             )
+
+
 
             # Process with ADK Agent
             session = await self.runner.session_service.create_session(
@@ -73,6 +82,25 @@ class ProductAgentExecutor(AgentExecutor):
             async for event in self.runner.run_async(
                 user_id=user_id, session_id=session.id, new_message=content
             ):
+                #logger.info(f"Event created after running the Agent against the Request: {event}")
+                logger.info(f"Author of the Event: {event.author}")
+                logger.info(f"Content of the Event {event.content}")
+
+                calls = event.get_function_calls()
+                if calls:
+                    for call in calls:
+                        tool_name = call.name
+                        arguments = call.args
+                        logger.info(f"Tool Call: {tool_name}, Args: {arguments}")
+
+                responses = event.get_function_response()
+                if responses:
+                    for response in responses:
+                        tool_name = response.name
+                        result_dict = response.response
+                        logger.info(f"Tool Result: {tool_name} -> {result_dict}")
+
+                logger.info("-----------------------------------------------")
                 if event.is_final_response() and event.content and event.content.parts:
                     for part in event.content.parts:
                         if hasattr(part, "text") and part.text:
@@ -87,6 +115,8 @@ class ProductAgentExecutor(AgentExecutor):
             )
 
             await updater.complete()
+
+            logger.info(f"The sequence of all the events recorded: {session.events}")
 
         except Exception as e:
             await updater.update_status(

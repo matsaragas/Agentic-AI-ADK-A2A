@@ -1,7 +1,5 @@
 from google.adk.agents import LlmAgent
 from google.adk.models.google_llm import Gemini
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
 from agent_tools import get_product_info
 from agent_utils import retry_config
 

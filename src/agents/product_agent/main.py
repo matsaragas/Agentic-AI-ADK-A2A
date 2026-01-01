@@ -19,7 +19,10 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+host = "localhost"
+port = 10001
 
+logger.info(f"Attempting to start A2A server on http://{host}:{port}")
 class MissingAPIKeyError(Exception):
     """Exception from missing API key"""
 
@@ -63,7 +66,7 @@ def main(host, port):
         agent_card=agent_card, http_handler=request_handler
     )
 
-    uvicorn.run(server.build(), host=host, port=port)
+    uvicorn.run(server.build(), host=host, port=port, log_level="info" )
 
 if __name__ == "__main__":
     main()
