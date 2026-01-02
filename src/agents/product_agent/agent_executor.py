@@ -93,13 +93,6 @@ class ProductAgentExecutor(AgentExecutor):
                         arguments = call.args
                         logger.info(f"Tool Call: {tool_name}, Args: {arguments}")
 
-                responses = event.get_function_response()
-                if responses:
-                    for response in responses:
-                        tool_name = response.name
-                        result_dict = response.response
-                        logger.info(f"Tool Result: {tool_name} -> {result_dict}")
-
                 logger.info("-----------------------------------------------")
                 if event.is_final_response() and event.content and event.content.parts:
                     for part in event.content.parts:
@@ -114,9 +107,11 @@ class ProductAgentExecutor(AgentExecutor):
                 name=self.artifact_name,
             )
 
+            logger.info(f"The sequence of all the events recorded: {session.events}")
+
             await updater.complete()
 
-            logger.info(f"The sequence of all the events recorded: {session.events}")
+
 
         except Exception as e:
             await updater.update_status(

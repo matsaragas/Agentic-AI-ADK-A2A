@@ -93,12 +93,6 @@ class ShippingAgentExecutor(AgentExecutor):
                         arguments = call.args
                         logger.info(f"Tool Call: {tool_name}, Args: {arguments}")
 
-                responses = event.get_function_response()
-                if responses:
-                    for response in responses:
-                        tool_name = response.name
-                        result_dict = response.response
-                        logger.info(f"Tool Result: {tool_name} -> {result_dict}")
 
                 logger.info("-----------------------------------------------")
                 if event.is_final_response() and event.content and event.content.parts:

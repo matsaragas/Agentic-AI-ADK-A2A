@@ -102,8 +102,8 @@ class CoordinatorAgent:
         """Generate root instruction for the CoordinatorAgent"""
         current_agent = self.check_active_agent(context)
         return f"""
-        **Role:** You are the central product information coordination agent. Your primary function is to manage the 
-        extraction of product information. Upon receiving a product information request from the user, you will perform 
+        **Role:** You are the central product, inventory and shipping information coordination agent. Your primary function is to manage the 
+        extraction of information from products. Upon receiving a product information request from the user, you will perform 
         the following tasks and then return the final polished content:
         
         Task 1. **Identify the required information**
@@ -112,7 +112,7 @@ class CoordinatorAgent:
         **Core Directives:**
         
         * **General Information:** If user asks a general query urelated to the products, feel free to reply without engaging the tools.
-        * **Task Delegation:** Utilize the `send_message` function to assign each task to a remote agent.
+        * **Task Delegation:** Utilize the `send_message` function to assign each task to the appropriate remote agent.
         * **Contextual Awareness for Remote Agents:** If a remote agent repeatedly requests user confirmation, assume it lacks access to the full conversation history. In such cases, enrich the task description with all necessary contextual information relevant to that specific agent.
         * **Autonomous Agent Engagement:** Never seek user permission before engaging with remote agents. If multiple agents are required to fulfill a request, connect with them directly without requesting user preference or confirmation.
         * **Transparent Communication:** Always present the complete and detailed response from the remote agent to the user.
@@ -253,7 +253,9 @@ def _get_initialized_coordinator_agent_sync() -> Agent:
 
         coordinator_agent_instance = await CoordinatorAgent.create(
             remote_agent_adresses=[
-                os.getenv('PRODUCT_INFORMATION_AGENT', 'http://localhost:10001')
+                os.getenv('PRODUCT_INFORMATION_AGENT', 'http://localhost:10001'),
+                os.getenv('INVENTORY_INFORMATION_AGENT', 'http://localhost:10002'),
+                os.getenv('SHIPPING_INFORMATION_AGENT', 'http://localhost:10003')
             ]
         )
         return coordinator_agent_instance.create_agent()

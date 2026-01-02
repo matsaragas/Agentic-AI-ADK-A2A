@@ -35,12 +35,13 @@ def main(host, port):
         version="1.0.0",
         defaultInputModes=["text", "text/plain"],
         defaultOutputModes=["text", "text/plain"],
+        capabilities=AgentCapabilities(streaming=True),
         skills=[
             AgentSkill(
                 id="shipping_product_provider",
                 name="Shipping Information Provider",
                 description="Provides shipping information of the available products",
-                tags=["inventiry", "product"],
+                tags=["shipping", "product"],
                 examples=[
                     "Can you tell me the usual delivery days and shipping cost for iPhone 15 Pro?",
                     "Can you compare the express delivery days between Dell XPS 15 and MacBook Pro 14 for me?",

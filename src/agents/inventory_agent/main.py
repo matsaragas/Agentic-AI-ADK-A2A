@@ -29,18 +29,19 @@ class MissingAPIKeyError(Exception):
 def main(host, port):
 
     agent_card = AgentCard(
-        name="Product Catalog Agent",
+        name="Inventory Agent",
         description=inventory_product_agent.description,
         url=f'http://{host}:{port}',
         version="1.0.0",
         defaultInputModes=["text", "text/plain"],
         defaultOutputModes=["text", "text/plain"],
+        capabilities=AgentCapabilities(streaming=True),
         skills=[
             AgentSkill(
                 id="inventory_product_provider",
                 name="Inventory Provider",
                 description="Provides inventory information of the available products",
-                tags=["inventiry", "product"],
+                tags=["inventory", "product"],
                 examples=[
                     "Can you tell me the current stock quantity for iPhone 15 Pro? what is the next reorder date and quantity",
                     "Can you compare the current stock quantities between Dell XPS 15 and MacBook Pro 14 for me?",
@@ -62,7 +63,7 @@ def main(host, port):
         agent_card=agent_card, http_handler=request_handler
     )
 
-    uvicorn.run(server.build(), host=host, port=port)
+    uvicorn.run(server.build(), host=host, port=port, log_level="info")
 
 if __name__ == "__main__":
     main()
