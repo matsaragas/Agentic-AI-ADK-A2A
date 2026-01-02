@@ -2,7 +2,7 @@
 import logging
 import click
 import uvicorn
-from inventory_agent import inventory_product_agent
+from shipping_agent import product_shipping_agent
 from a2a.server.apps import A2AStarletteApplication
 from a2a.types import (
     AgentCapabilities,
@@ -11,7 +11,7 @@ from a2a.types import (
 )
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.server.request_handlers import DefaultRequestHandler
-from inventory_executor import InventoryAgentExecutor
+from shipping_executor import ShippingAgentExecutor
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,26 +25,26 @@ class MissingAPIKeyError(Exception):
 
 @click.command()
 @click.option("--host", default="localhost")
-@click.option("--port", default=10002)
+@click.option("--port", default=10003)
 def main(host, port):
 
     agent_card = AgentCard(
-        name="Product Catalog Agent",
-        description=inventory_product_agent.description,
+        name="Product Shipping Agent",
+        description=product_shipping_agent.description,
         url=f'http://{host}:{port}',
         version="1.0.0",
         defaultInputModes=["text", "text/plain"],
         defaultOutputModes=["text", "text/plain"],
         skills=[
             AgentSkill(
-                id="inventory_product_provider",
-                name="Inventory Provider",
-                description="Provides inventory information of the available products",
+                id="shipping_product_provider",
+                name="Shipping Information Provider",
+                description="Provides shipping information of the available products",
                 tags=["inventiry", "product"],
                 examples=[
-                    "Can you tell me the current stock quantity for iPhone 15 Pro? what is the next reorder date and quantity",
-                    "Can you compare the current stock quantities between Dell XPS 15 and MacBook Pro 14 for me?",
-                    "What is the current stock quantity for ipad air, who is the vendor and what is the next reorder date?"
+                    "Can you tell me the usual delivery days and shipping cost for iPhone 15 Pro?",
+                    "Can you compare the express delivery days between Dell XPS 15 and MacBook Pro 14 for me?",
+                    "What is the express delivery info for ipad air?"
                 ],
             )
         ],
@@ -52,8 +52,8 @@ def main(host, port):
     )
 
     request_handler = DefaultRequestHandler(
-        agent_executor=InventoryAgentExecutor(
-            agent=inventory_product_agent,
+        agent_executor=ShippingAgentExecutor(
+            agent=product_shipping_agent,
         ),
         task_store=InMemoryTaskStore(),
     )
